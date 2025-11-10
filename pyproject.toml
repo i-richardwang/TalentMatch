@@ -1,0 +1,19 @@
+[project]
+name = "talentmatch"
+version = "0.2.0"
+description = "AI-powered talent recommendation system with intelligent candidate matching"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-community>=0.3.25",
+    "langchain-core>=0.3.65",
+    "langchain-openai>=0.3.24",
+    "langfuse>=3.0.3",
+    "mysql-connector-python>=9.3.0",
+    "numpy>=2.3.0",
+    "pandas>=2.3.0",
+    "pydantic>=2.11.7",
+    "pymilvus>=2.5.11",
+    "python-dotenv>=1.1.0",
+    "streamlit>=1.46.0",
+]
