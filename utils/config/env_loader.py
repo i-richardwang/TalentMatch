@@ -20,20 +20,26 @@ def get_project_root() -> Path:
 def load_env(env_file: str = ".env") -> bool:
     """
     Load environment variables file
-    
+
     Args:
         env_file: Environment file name, defaults to .env
-        
+
     Returns:
         bool: Whether the environment file was loaded successfully
+
+    Note:
+        In cloud deployment (e.g., Streamlit Cloud), environment variables
+        are typically set via the platform's secrets management, so missing
+        .env file is expected and not an error.
     """
     project_root = get_project_root()
     env_path = project_root / env_file
-    
+
     if not env_path.exists():
-        logger.warning(f"Environment file {env_path} does not exist")
+        # Only log as info (not warning) since cloud deployments don't use .env files
+        logger.info(f"Environment file {env_path} does not exist (this is normal for cloud deployments)")
         return False
-    
+
     try:
         load_dotenv(env_path)
         logger.info(f"Successfully loaded environment file: {env_path}")

@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import uuid
 import asyncio
+import tempfile
+from pathlib import Path
 
 # Add project root directory to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -14,7 +16,36 @@ if project_root not in sys.path:
 from langchain_core.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
 
-set_llm_cache(SQLiteCache(database_path="data/llm_cache/langchain.db"))
+# Setup LLM cache with fallback to temp directory for cloud deployment
+def setup_llm_cache():
+    """
+    Setup LLM cache with support for both local and cloud deployment.
+    - Local: uses data/llm_cache/langchain.db
+    - Cloud (Streamlit): uses system temp directory
+    """
+    # Try local cache directory first
+    local_cache_dir = Path(project_root) / "data" / "llm_cache"
+    local_cache_path = local_cache_dir / "langchain.db"
+
+    try:
+        # Ensure directory exists and is writable
+        local_cache_dir.mkdir(parents=True, exist_ok=True)
+        # Test write permission by creating a test file
+        test_file = local_cache_dir / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+
+        # If successful, use local cache
+        cache_path = local_cache_path
+    except (OSError, PermissionError):
+        # Fallback to system temp directory (for Streamlit Cloud)
+        temp_cache_dir = Path(tempfile.gettempdir()) / "talentmatch_cache"
+        temp_cache_dir.mkdir(exist_ok=True)
+        cache_path = temp_cache_dir / "langchain.db"
+
+    set_llm_cache(SQLiteCache(database_path=str(cache_path)))
+
+setup_llm_cache()
 
 from backend.resume_management.recommendation.resume_recommender import (
     ResumeRecommender,
